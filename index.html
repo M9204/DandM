@@ -120,7 +120,7 @@
   <label>📍 مكان كتابة التقرير (اختياري):</label>
   <input type="text" placeholder="مثال: غرفتي، الكورنيش...">
 
-  <button onclick="sendTextReport()">حفظ التقرير</button>
+  <button onclick="sendReportAsText()">حفظ التقرير</button>
 
   <!-- زر واتساب -->
   <a class="whatsapp-button"
@@ -136,79 +136,65 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <script>
-  emailjs.init('CIxJTBuY6z0zDygZB'); // ضع هنا User ID من EmailJS
+  emailjs.init('CIxJTBuY6z0zDygZB'); // ضع هنا معرف المستخدم من EmailJS
 
-  function sendTextReport() {
-    const toName = document.querySelectorAll('input')[0].value;
-    const fromName = document.querySelectorAll('input')[1].value;
-    const date = document.querySelectorAll('input[type="date"]')[0].value;
+  function sendReportAsText() {
+    const inputs = document.querySelectorAll("input, textarea");
+    const data = {};
 
-    const answers = document.querySelectorAll('textarea');
-    const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
-    const otherSuggestion = document.querySelector('.checkbox-group input[type="text"]').value;
-    const location = document.querySelectorAll('input[type="text"]')[2].value;
-
-    let suggestions = '';
-    checkboxes.forEach((box, i) => {
-      if (box.checked) {
-        suggestions += `- ${box.parentElement.textContent.trim()}\n`;
+    inputs.forEach(input => {
+      if (input.type === "checkbox") {
+        if (input.checked) {
+          if (!data.suggestions) data.suggestions = [];
+          data.suggestions.push(input.parentElement.textContent.trim());
+        }
+      } else {
+        const label = input.closest("label") || input.previousElementSibling;
+        const key = label?.innerText?.trim() || "معلومة غير مسماة";
+        data[key] = input.value;
       }
     });
 
-    if (otherSuggestion.trim()) {
-      suggestions += `- أخرى: ${otherSuggestion.trim()}\n`;
-    }
+    const textBody = `
+تقرير تواصلي من القلب 💌
 
-    const report = `
-📌 تقرير تواصلي من القلب 💌
-
-إلى: ${toName}
-من: ${fromName}
-التاريخ: ${date}
+🧑‍🤝‍🧑 إلى: ${data["إلى (حبيبي):"] || ""}
+✍️ من: ${data["من (اسمك):"] || ""}
+📅 التاريخ: ${data["التاريخ:"] || ""}
 
 1. 💭 كيف أشعر في هذه الفترة؟
-${answers[0].value}
+${data["1. 💭 كيف أشعر في هذه الفترة؟"] || ""}
 
 2. 💔 ما الذي يزعجني أو يؤلمني حاليًا؟
-${answers[1].value}
+${data["2. 💔 ما الذي يزعجني أو يؤلمني حاليًا؟"] || ""}
 
 3. 🤷‍♀️ ما الذي أحتاجه منك فعلًا؟
-${answers[2].value}
+${data["3. 🤷‍♀️ ما الذي أحتاجه منك فعلًا؟"] || ""}
 
 4. 🧠 ما الذي أتمنى أن تفهمه عني أكثر؟
-${answers[3].value}
+${data["4. 🧠 ما الذي أتمنى أن تفهمه عني أكثر؟"] || ""}
 
 5. 💡 اقتراحات أو خطوات أحب أن نبدأ بها:
-${suggestions.trim()}
+${(data.suggestions || []).join("\n")}
 
 6. 🫶 كلمة من قلبي لك:
-${answers[4].value}
+${data["6. 🫶 كلمة من قلبي لك:"] || ""}
 
-📍 مكان كتابة التقرير: ${location || 'غير محدد'}
-    `;
+📍 مكان كتابة التقرير:
+${data["📍 مكان كتابة التقرير (اختياري):"] || ""}
+`;
 
-    // تحويل النص إلى base64 لتضمينه كمرفق
-    const blob = new Blob([report], { type: 'text/plain' });
-    const reader = new FileReader();
-
-    reader.onload = function () {
-      const base64 = reader.result.split(',')[1];
-
-      emailjs.send('service_bgfjjx9', 'template_qay148z', {
-        to_email: 'fattahvic@gmail.com',
-        message: '💌 تم إرسال تقرير تواصلي من القلب إليك ❤️',
-        file: base64,
-        filename: "report.txt"
-      }).then(function () {
-        alert('✅ تم إرسال التقرير إلى fattahvic@gmail.com');
-      }, function (error) {
-        alert('❌ فشل الإرسال: ' + JSON.stringify(error));
-      });
-    };
-
-    reader.readAsDataURL(blob);
+    emailjs.send('service_bgfjjx9', 'template_qay148z', {
+      to_email: 'fattahvic@gmail.com',
+      message: textBody
+    }).then(function () {
+      alert('✅ تم إرسال التقرير إلى fattahvic@gmail.com بنجاح!');
+    }, function (error) {
+      alert('❌ فشل الإرسال: ' + JSON.stringify(error));
+    });
   }
 </script>
+
 
 
 </body>
