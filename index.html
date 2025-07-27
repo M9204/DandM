@@ -78,6 +78,8 @@
     }
   </style>
 </head>
+
+  
 <body>
 
   <h1>📝 تقرير تواصلي من القلب 💌</h1>
@@ -118,16 +120,48 @@
   <label>📍 مكان كتابة التقرير (اختياري):</label>
   <input type="text" placeholder="مثال: غرفتي، الكورنيش...">
 
-  <button onclick="alert('💖 تم حفظ مشاعركِ.. شكراً لصراحتكِ!')">حفظ التقرير</button>
+  <button onclick="downloadPDFAndEmail()">حفظ التقرير</button>
 
   <!-- زر واتساب -->
   <a class="whatsapp-button"
-     href="https://wa.me/97477235756?text=السلام%20عليكم%20💌%20أشاركك%20هذا%20التقرير%20التواصلي%20الجميل%20الذي%20يعبر%20عن%20مشاعري%20❤️"
-     target="_blank">
-    📤 شارك التقرير عبر WhatsApp إلى +97477235756
-  </a>
+   href="https://wa.me/97477235756?text=💌%20لقد%20قمت%20بإعداد%20تقرير%20PDF%20من%20قلبي%20إليك.%20سأرفقه%20الآن%20❤️"
+   target="_blank">
+  📤 أرسل الرابط عبر WhatsApp بعد تحميل الـ PDF
+</a>
+
 
   <div class="footer">© صفحة تعبّر عنكِ.. لتقربي بين القلوب ❤️</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+  emailjs.init('CIxJTuY6z0zDygZB'); // من EmailJS
+
+  function downloadPDFAndEmail() {
+    const element = document.body.cloneNode(true);
+
+    element.querySelector('.whatsapp-button')?.remove();
+    element.querySelector('button')?.remove();
+
+    html2pdf().from(element).outputPdf('datauristring').then(function (pdfDataUri) {
+      const base64 = pdfDataUri.split(',')[1]; // Extract base64 string
+
+      emailjs.send('service_bgfjjx9', 'template_qay148z', {
+        to_email: 'fattahvic@gmail.com',
+        message: '💌 هذا التقرير أُرسل تلقائيًا من الصفحة.',
+        pdf_base64: base64
+      }).then(function () {
+        alert('✅ تم إرسال التقرير إلى fattahvic@gmail.com');
+      }, function (error) {
+        alert('❌ فشل الإرسال: ' + JSON.stringify(error));
+      });
+    });
+
+    alert('💖 تم حفظ مشاعركِ.. وجارٍ إرسالها إلى الإيميل!');
+  }
+</script>
+
 
 </body>
 </html>
